@@ -7,9 +7,11 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class ServerConnection implements Callable<Boolean> {
+    final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     Socket socket;
     public ServerConnection(Socket socket) {
         this.socket = socket;
@@ -33,16 +35,16 @@ public class ServerConnection implements Callable<Boolean> {
             }
 
             final var path = parts[1];
-//            if (!validPaths.contains(path)) {
-//                out.write((
-//                        "HTTP/1.1 404 Not Found\r\n" +
-//                                "Content-Length: 0\r\n" +
-//                                "Connection: close\r\n" +
-//                                "\r\n"
-//                ).getBytes());
-//                out.flush();
-//                continue;
-//            }
+            if (!validPaths.contains(path)) {
+                out.write((
+                        "HTTP/1.1 404 Not Found\r\n" +
+                                "Content-Length: 0\r\n" +
+                                "Connection: close\r\n" +
+                                "\r\n"
+                ).getBytes());
+                out.flush();
+                return false;
+            }
 
             final var filePath = Path.of(".", "public", path);
             final var mimeType = Files.probeContentType(filePath);
