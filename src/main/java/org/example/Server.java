@@ -7,18 +7,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    ExecutorService service;
+    private final int serverPort;
+    private final ExecutorService service;
+
+    public Server(int serverPort, int fixedThreadPoolSize) {
+        this.serverPort = serverPort;
+        this.service = Executors.newFixedThreadPool(fixedThreadPoolSize);
+    }
 
     public void start() {
-        service = Executors.newFixedThreadPool(64);
-        try (final var server = new ServerSocket(9999))
+        try (final var server = new ServerSocket(serverPort))
         {
             while (true) {
                 Socket socket = server.accept();
                 service.submit(new ServerConnection(socket));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Не удалось установить подключение! " + e);
         }
     }
 }
